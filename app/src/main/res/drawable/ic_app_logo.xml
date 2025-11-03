@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <!-- Simple shield + two circles to approximate the provided logo -->
+    <path
+        android:fillColor="#FB8C00"
+        android:pathData="M50,2 C30,2 10,14 10,36 C10,62 30,82 50,98 C70,82 90,62 90,36 C90,14 70,2 50,2 Z"/>
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M50,26 a8,8 0 1,0 0.01,0 Z M60,40 a5,5 0 1,0 0.01,0 Z" />
+</vector>
+

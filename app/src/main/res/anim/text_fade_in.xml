@@ -6,11 +6,10 @@
         android:fromAlpha="0.0"
         android:toAlpha="1.0"
         android:interpolator="@android:anim/decelerate_interpolator"/>
-
+    
     <translate
         android:duration="500"
         android:fromXDelta="20%"
         android:toXDelta="0"
         android:interpolator="@android:anim/decelerate_interpolator"/>
 </set>
-

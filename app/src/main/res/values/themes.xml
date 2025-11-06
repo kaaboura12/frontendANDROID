@@ -22,4 +22,15 @@
     <style name="Theme.DAM_android.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.DAM_android.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <!-- Style pour les champs de saisie du code de vérification -->
+    <style name="CodeInputStyle">
+        <item name="android:background">@drawable/code_input_background</item>
+        <item name="android:gravity">center</item>
+        <item name="android:inputType">number</item>
+        <item name="android:maxLength">1</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
 </resources>

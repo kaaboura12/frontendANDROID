@@ -1,76 +1,80 @@
 package com.example.dam_android.data.repository
 
-import com.example.dam_android.data.local.UserFileManager
 import com.example.dam_android.data.model.AuthResult
 import com.example.dam_android.data.model.User
 import com.example.dam_android.data.model.UserRole
+import com.example.dam_android.data.api.ApiService
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
-class AuthRepository(private val userFileManager: UserFileManager) {
+/**
+ * Repository d'authentification utilisant l'API backend
+ * Communique avec le serveur Node.js + MongoDB
+ */
+class AuthRepository {
 
     fun signIn(email: String, password: String): Flow<AuthResult> = flow {
         emit(AuthResult.Loading)
-        delay(500) // Simule un délai
 
         try {
-            // Authentifier l'utilisateur depuis le fichier
-            val user = userFileManager.authenticateUser(email, password)
+            val result = ApiService.loginUser(email, password)
 
-            if (user != null) {
+            if (result.isSuccess) {
+                val (user, token) = result.getOrNull()!!
+                // Retourner un AuthResult qui inclut le token
+                emit(AuthResult.Success(user, token))
+            } else {
+                emit(AuthResult.Error(result.exceptionOrNull()?.message ?: "Échec de connexion"))
+            }
+        } catch (e: Exception) {
+            emit(AuthResult.Error("Erreur de connexion: ${e.message}"))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    fun signUp(name: String, lastName: String, email: String, password: String, role: UserRole): Flow<AuthResult> = flow {
+        emit(AuthResult.Loading)
+
+        try {
+            val result = ApiService.registerUser(name, lastName, email, password, role.name)
+
+            if (result.isSuccess) {
+                val user = result.getOrNull()!!
                 emit(AuthResult.Success(user))
             } else {
-                emit(AuthResult.Error("Email ou mot de passe incorrect"))
+                emit(AuthResult.Error(result.exceptionOrNull()?.message ?: "Échec d'inscription"))
             }
         } catch (e: Exception) {
-            emit(AuthResult.Error("Erreur: ${e.message}"))
+            emit(AuthResult.Error("Erreur d'inscription: ${e.message}"))
         }
     }.flowOn(Dispatchers.IO)
 
-    fun signUp(name: String, email: String, password: String, role: UserRole): Flow<AuthResult> = flow {
-        emit(AuthResult.Loading)
-        delay(500) // Simule un délai
-
+    fun resetPassword(email: String): Flow<Result<String>> = flow {
         try {
-            // Créer l'objet utilisateur
-            val newUser = User(
-                id = email.hashCode().toString(),
-                email = email,
-                name = name,
-                password = password,
-                role = role
-            )
-
-            // Sauvegarder dans le fichier
-            val saved = userFileManager.saveUser(newUser)
-
-            if (saved) {
-                emit(AuthResult.Success(newUser))
-            } else {
-                emit(AuthResult.Error("Cet email est déjà utilisé"))
-            }
+            val result = ApiService.forgotPassword(email)
+            emit(result)
         } catch (e: Exception) {
-            emit(AuthResult.Error("Erreur: ${e.message}"))
+            emit(Result.failure(e))
         }
     }.flowOn(Dispatchers.IO)
 
-    fun resetPassword(email: String): Flow<Boolean> = flow {
-        delay(500) // Simule un délai
-        val userExists = userFileManager.userExists(email)
-        emit(userExists)
+    fun resetPasswordWithCode(email: String, code: String, newPassword: String): Flow<Result<String>> = flow {
+        try {
+            val result = ApiService.resetPasswordWithCode(email, code, newPassword)
+            emit(result)
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
     }.flowOn(Dispatchers.IO)
 
-    companion object {
-        @Volatile
-        private var instance: AuthRepository? = null
-
-        fun getInstance(userFileManager: UserFileManager): AuthRepository {
-            return instance ?: synchronized(this) {
-                instance ?: AuthRepository(userFileManager).also { instance = it }
-            }
+    // Récupérer tous les utilisateurs
+    suspend fun getAllUsers(): List<User> {
+        return try {
+            val result = ApiService.getAllUsers()
+            result.getOrNull() ?: emptyList()
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 }

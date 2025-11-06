@@ -14,8 +14,11 @@ class SessionManager(context: Context) {
         private const val KEY_USER_ID = "user_id"
         private const val KEY_USER_EMAIL = "user_email"
         private const val KEY_USER_NAME = "user_name"
+        private const val KEY_USER_LAST_NAME = "user_last_name"
+        private const val KEY_USER_PHONE = "user_phone"
         private const val KEY_USER_ROLE = "user_role"
         private const val KEY_IS_LOGGED_IN = "is_logged_in"
+        private const val KEY_AUTH_TOKEN = "auth_token"
 
         @Volatile
         private var instance: SessionManager? = null
@@ -27,13 +30,16 @@ class SessionManager(context: Context) {
         }
     }
 
-    fun saveUser(user: User) {
+    fun saveUser(user: User, token: String? = null) {
         prefs.edit().apply {
             putString(KEY_USER_ID, user.id)
             putString(KEY_USER_EMAIL, user.email)
             putString(KEY_USER_NAME, user.name)
+            putString(KEY_USER_LAST_NAME, user.lastName)
+            putString(KEY_USER_PHONE, user.phoneNumber)
             putString(KEY_USER_ROLE, user.role.name)
             putBoolean(KEY_IS_LOGGED_IN, true)
+            token?.let { putString(KEY_AUTH_TOKEN, it) }
             apply()
         }
     }
@@ -42,18 +48,19 @@ class SessionManager(context: Context) {
         if (!isLoggedIn()) return null
 
         val roleString = prefs.getString(KEY_USER_ROLE, UserRole.CHILD.name) ?: UserRole.CHILD.name
-        val role = try {
-            UserRole.valueOf(roleString)
-        } catch (e: IllegalArgumentException) {
-            UserRole.CHILD
-        }
 
         return User(
             id = prefs.getString(KEY_USER_ID, "") ?: "",
             email = prefs.getString(KEY_USER_EMAIL, "") ?: "",
             name = prefs.getString(KEY_USER_NAME, "") ?: "",
-            role = role
+            lastName = prefs.getString(KEY_USER_LAST_NAME, "") ?: "",
+            phoneNumber = prefs.getString(KEY_USER_PHONE, "") ?: "",
+            roleString = roleString
         )
+    }
+
+    fun getAuthToken(): String? {
+        return prefs.getString(KEY_AUTH_TOKEN, null)
     }
 
     fun isLoggedIn(): Boolean {
@@ -64,4 +71,3 @@ class SessionManager(context: Context) {
         prefs.edit().clear().apply()
     }
 }
-

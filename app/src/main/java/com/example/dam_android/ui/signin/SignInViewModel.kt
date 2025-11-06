@@ -1,4 +1,4 @@
-package com.example.dam_android.viewmodel
+package com.example.dam_android.ui.signin
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

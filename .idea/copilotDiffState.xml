@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/FIX_FINAL_RESET.bat">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/FIX_FINAL_RESET.bat" />
+              <option name="updatedContent" value="@echo off&#10;echo ========================================&#10;echo FIX FINAL - RESET PASSWORD CODE&#10;echo ========================================&#10;echo.&#10;echo Correction: Le backend veut &quot;code&quot; (pas &quot;resetCode&quot;)&#10;echo.&#10;pause&#10;&#10;echo.&#10;echo [1/2] Construction...&#10;call gradlew assembleDebug&#10;&#10;if %ERRORLEVEL% NEQ 0 (&#10;    echo.&#10;    echo [ERREUR] Construction echouee!&#10;    pause&#10;    exit /b 1&#10;)&#10;&#10;echo.&#10;echo [2/2] Installation...&#10;call gradlew installDebug&#10;&#10;if %ERRORLEVEL% NEQ 0 (&#10;    echo.&#10;    echo [ERREUR] Installation echouee!&#10;    pause&#10;    exit /b 1&#10;)&#10;&#10;echo.&#10;echo ========================================&#10;echo ✅ INSTALLATION REUSSIE!&#10;echo ========================================&#10;echo.&#10;echo Le JSON envoye sera maintenant:&#10;echo {&#10;echo   &quot;email&quot;: &quot;souhaila.karkoub@esprit.tn&quot;,&#10;echo   &quot;code&quot;: &quot;485128&quot;,&#10;echo   &quot;newPassword&quot;: &quot;votre_nouveau_mdp&quot;&#10;echo }&#10;echo.&#10;echo TESTEZ:&#10;echo 1. Demandez un NOUVEAU code (forgot password)&#10;echo 2. Verifiez votre email&#10;echo 3. Entrez le code exact dans les 6 cases&#10;echo 4. Entrez votre nouveau mot de passe&#10;echo 5. Cliquez sur &quot;Reset Password&quot;&#10;echo.&#10;pause&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/res/anim/text_fade_in.xml">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/app/src/main/res/anim/text_fade_in.xml" />
+              <option name="originalContent" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#10;&lt;set xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;&#10;    &lt;!-- Text fade in from right --&gt;&#10;    &lt;alpha&#10;        android:duration=&quot;500&quot;&#10;        android:fromAlpha=&quot;0.0&quot;&#10;        android:toAlpha=&quot;1.0&quot;&#10;        android:interpolator=&quot;@android:anim/decelerate_interpolator&quot;/&gt;&#10;    &#10;    &lt;translate&#10;        android:duration=&quot;500&quot;&#10;        android:fromXDelta=&quot;20%&quot;&#10;        android:toXDelta=&quot;0&quot;&#10;        android:interpolator=&quot;@android:anim/decelerate_interpolator&quot;/&gt;&#10;&lt;/set&gt;&#10;" />
+              <option name="updatedContent" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#10;&lt;set xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;&#10;    &lt;!-- Text fade in from right --&gt;&#10;    &lt;alpha&#10;        android:duration=&quot;500&quot;&#10;        android:fromAlpha=&quot;0.0&quot;&#10;        android:toAlpha=&quot;1.0&quot;&#10;        android:interpolator=&quot;@android:anim/decelerate_interpolator&quot;/&gt;&#10;    &#10;    &lt;translate&#10;        android:duration=&quot;500&quot;&#10;        android:fromXDelta=&quot;20%&quot;&#10;        android:toXDelta=&quot;0&quot;&#10;        android:interpolator=&quot;@android:anim/decelerate_interpolator&quot;/&gt;&#10;&lt;/set&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/res/drawable/bg_splash_gradient.xml">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/app/src/main/res/drawable/bg_splash_gradient.xml" />
+              <option name="originalContent" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#10;&lt;shape xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;&#10;    &lt;gradient&#10;        android:angle=&quot;135&quot;&#10;        android:startColor=&quot;#FFE0B2&quot;&#10;        android:centerColor=&quot;#FFCC80&quot;&#10;        android:endColor=&quot;#FFB74D&quot;&#10;        android:type=&quot;linear&quot;/&gt;&#10;&lt;/shape&gt;&#10;" />
+              <option name="updatedContent" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#10;&lt;shape xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;&#10;    &lt;gradient&#10;        android:angle=&quot;135&quot;&#10;        android:startColor=&quot;#FFE0B2&quot;&#10;        android:centerColor=&quot;#FFCC80&quot;&#10;        android:endColor=&quot;#FFB74D&quot;&#10;        android:type=&quot;linear&quot;/&gt;&#10;&lt;/shape&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

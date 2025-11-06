@@ -13,17 +13,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.dam_android.R
-import com.example.dam_android.data.local.UserFileManager
 import com.example.dam_android.data.repository.AuthRepository
-import com.example.dam_android.viewmodel.ForgotPasswordViewModel
+import com.example.dam_android.ui.forgotpassword.ForgotPasswordViewModel
 import com.example.dam_android.viewmodel.ViewModelFactory
 import com.google.android.material.button.MaterialButton
 
 class ForgotPasswordFragment : Fragment() {
 
     private val viewModel: ForgotPasswordViewModel by viewModels {
-        val userFileManager = UserFileManager.getInstance(requireContext())
-        val authRepository = AuthRepository.getInstance(userFileManager)
+        val authRepository = AuthRepository()
         ViewModelFactory(authRepository)
     }
 
@@ -86,7 +84,11 @@ class ForgotPasswordFragment : Fragment() {
                     btnResetPassword.isEnabled = true
                     btnResetPassword.text = "Reset password"
                     Toast.makeText(requireContext(), result.message, Toast.LENGTH_SHORT).show()
-                    findNavController().navigateUp()
+                    // Rediriger vers l'écran de réinitialisation avec l'email
+                    val bundle = Bundle().apply {
+                        putString("email", inputEmail.text.toString())
+                    }
+                    findNavController().navigate(R.id.action_forgotPasswordFragment_to_resetPasswordFragment, bundle)
                 }
                 is ForgotPasswordViewModel.ResetPasswordResult.Error -> {
                     btnResetPassword.isEnabled = true

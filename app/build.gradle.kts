@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    // Ajout du plugin Realm pour MongoDB
+    id("io.realm.kotlin") version "1.13.0"
 }
 
 android {
@@ -53,9 +55,19 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
-
-    // Gson pour la sérialisation JSON
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("com.google.code.gson:gson:2.10.1")
+
+    // DNS resolver alternatif pour contourner les problèmes d'émulateur
+    implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:4.11.0")
+
+    // MongoDB Realm SDK pour connexion directe à MongoDB Atlas
+    implementation("io.realm.kotlin:library-base:1.13.0")
+    implementation("io.realm.kotlin:library-sync:1.13.0")
+
+    // Coroutines pour opérations asynchrones
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

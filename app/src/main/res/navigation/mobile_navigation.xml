@@ -52,12 +52,24 @@
             android:id="@+id/action_signUpFragment_to_signInFragment"
             app:destination="@id/signInFragment" />
         <action
-            android:id="@+id/action_signUpFragment_to_parentHomeFragment"
+            android:id="@+id/action_signUpFragment_to_verificationFragment"
+            app:destination="@id/verificationFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/verificationFragment"
+        android:name="com.example.dam_android.ui.verification.VerificationFragment"
+        android:label="verification" >
+        <argument
+            android:name="email"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_verificationFragment_to_parentHomeFragment"
             app:destination="@id/parentHomeFragment"
             app:popUpTo="@id/signUpFragment"
             app:popUpToInclusive="true" />
         <action
-            android:id="@+id/action_signUpFragment_to_childHomeFragment"
+            android:id="@+id/action_verificationFragment_to_childHomeFragment"
             app:destination="@id/childHomeFragment"
             app:popUpTo="@id/signUpFragment"
             app:popUpToInclusive="true" />
@@ -66,7 +78,25 @@
     <fragment
         android:id="@+id/forgotPasswordFragment"
         android:name="com.example.dam_android.ui.forgotpassword.ForgotPasswordFragment"
-        android:label="forgot_password" />
+        android:label="forgot_password" >
+        <action
+            android:id="@+id/action_forgotPasswordFragment_to_resetPasswordFragment"
+            app:destination="@id/resetPasswordFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/resetPasswordFragment"
+        android:name="com.example.dam_android.ui.resetpassword.ResetPasswordFragment"
+        android:label="reset_password" >
+        <argument
+            android:name="email"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_resetPasswordFragment_to_signInFragment"
+            app:destination="@id/signInFragment"
+            app:popUpTo="@id/signInFragment"
+            app:popUpToInclusive="false" />
+    </fragment>
 
     <fragment
         android:id="@+id/parentHomeFragment"
@@ -77,10 +107,6 @@
             app:destination="@id/profileFragment" />
     </fragment>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="git init&#xA;" />
     <fragment
         android:id="@+id/childHomeFragment"
         android:name="com.example.dam_android.ui.child.home.ChildHomeFragment"
@@ -99,5 +125,13 @@
             app:destination="@id/signInFragment"
             app:popUpTo="@id/mobile_navigation"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_profileFragment_to_editProfileFragment"
+            app:destination="@id/editProfileFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="com.example.dam_android.ui.profile.EditProfileFragment"
+        android:label="edit_profile" />
 </navigation>

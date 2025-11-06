@@ -12,4 +12,5 @@
     <color name="orange_500">#FF8C00</color>
     <color name="orange_button">#FF8C00</color>
     <color name="bg_peach">#FFE0B2</color>
+    <color name="gray_600">#757575</color>
 </resources>

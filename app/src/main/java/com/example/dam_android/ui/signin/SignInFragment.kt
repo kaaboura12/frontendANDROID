@@ -13,19 +13,17 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.dam_android.R
 import com.example.dam_android.data.local.SessionManager
-import com.example.dam_android.data.local.UserFileManager
 import com.example.dam_android.data.model.AuthResult
 import com.example.dam_android.data.model.UserRole
 import com.example.dam_android.data.repository.AuthRepository
-import com.example.dam_android.viewmodel.SignInViewModel
+import com.example.dam_android.ui.signin.SignInViewModel
 import com.example.dam_android.viewmodel.ViewModelFactory
 import com.google.android.material.button.MaterialButton
 
 class SignInFragment : Fragment() {
 
     private val viewModel: SignInViewModel by viewModels {
-        val userFileManager = UserFileManager.getInstance(requireContext())
-        val authRepository = AuthRepository.getInstance(userFileManager)
+        val authRepository = AuthRepository()
         ViewModelFactory(authRepository)
     }
 
@@ -89,8 +87,8 @@ class SignInFragment : Fragment() {
                     btnSignIn.isEnabled = true
                     btnSignIn.text = getString(R.string.sign_in)
 
-                    // Sauvegarder la session utilisateur
-                    sessionManager.saveUser(result.user)
+                    // Sauvegarder la session utilisateur AVEC le token
+                    sessionManager.saveUser(result.user, result.token)
 
                     Toast.makeText(requireContext(), "Bienvenue ${result.user.name}!", Toast.LENGTH_SHORT).show()
 

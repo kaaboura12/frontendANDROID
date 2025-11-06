@@ -1,4 +1,4 @@
-package com.example.dam_android.viewmodel
+package com.example.dam_android.ui.forgotpassword
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -29,12 +29,21 @@ class ForgotPasswordViewModel(private val authRepository: AuthRepository) : View
         _resetResult.value = ResetPasswordResult.Loading
 
         viewModelScope.launch {
-            authRepository.resetPassword(emailValue).collect { success ->
-                _resetResult.value = if (success) {
-                    ResetPasswordResult.Success("Lien de réinitialisation envoyé à $emailValue")
-                } else {
-                    ResetPasswordResult.Error("Aucun compte trouvé avec cet email")
+            try {
+                authRepository.resetPassword(emailValue).collect { result ->
+                    if (result.isSuccess) {
+                        val message = result.getOrNull() ?: "Code de réinitialisation envoyé"
+                        _resetResult.value = ResetPasswordResult.Success(message)
+                    } else {
+                        val error = result.exceptionOrNull()?.message
+                            ?: "Impossible d'envoyer l'email. Vérifiez que le compte existe et est vérifié."
+                        _resetResult.value = ResetPasswordResult.Error(error)
+                    }
                 }
+            } catch (e: Exception) {
+                _resetResult.value = ResetPasswordResult.Error(
+                    e.message ?: "Erreur lors de l'envoi"
+                )
             }
         }
     }

@@ -2,14 +2,24 @@ package com.example.dam_android
 
 import android.os.Bundle
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
-import com.example.dam_android.databinding.ActivityMainBinding
-import com.example.dam_android.data.local.SessionManager
-import com.example.dam_android.data.api.RetrofitClient
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.example.dam_android.network.local.SessionManager
+import com.example.dam_android.network.api.RetrofitClient
+import com.example.dam_android.screens.*
+import com.example.dam_android.ui.theme.DamAndroidTheme
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
 
-    private lateinit var binding: ActivityMainBinding
     private val TAG = "MainActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,24 +28,270 @@ class MainActivity : AppCompatActivity() {
         try {
             Log.d(TAG, "onCreate: Démarrage MainActivity")
 
-            binding = ActivityMainBinding.inflate(layoutInflater)
-            setContentView(binding.root)
-
-            Log.d(TAG, "onCreate: View binding OK")
-
-            // Initialiser RetrofitClient avec SessionManager pour le support des tokens
+            // Initialiser RetrofitClient avec SessionManager
             val sessionManager = SessionManager.getInstance(this)
             RetrofitClient.init(sessionManager)
-            Log.d(TAG, "onCreate: RetrofitClient initialisé avec SessionManager")
+            Log.d(TAG, "onCreate: RetrofitClient initialisé")
 
-            // Masquer l'ActionBar
-            supportActionBar?.hide()
+            setContent {
+                DamAndroidTheme {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        AppNavigation()
+                    }
+                }
+            }
 
             Log.d(TAG, "onCreate: MainActivity prête")
 
         } catch (e: Exception) {
-            Log.e(TAG, "onCreate: ERREUR CRITIQUE", e)
+            Log.e(TAG, "onCreate: ERREUR", e)
             e.printStackTrace()
+        }
+    }
+}
+
+@Composable
+fun AppNavigation() {
+    val navController = rememberNavController()
+
+    NavHost(
+        navController = navController,
+        startDestination = "splash"
+    ) {
+        composable("splash") {
+            SplashScreen(
+                onNavigateToWelcome = {
+                    navController.navigate("welcome") {
+                        popUpTo("splash") { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable("welcome") {
+            WelcomeScreen(
+                onNavigateToSignIn = {
+                    navController.navigate("signin")
+                },
+                onNavigateToSignUp = {
+                    navController.navigate("signup")
+                }
+            )
+        }
+
+        composable("signin") {
+            SignInScreen(
+                onNavigateToSignUp = {
+                    navController.navigate("signup")
+                },
+                onNavigateToForgotPassword = {
+                    navController.navigate("forgot_password")
+                },
+                onNavigateToParentHome = {
+                    navController.navigate("parent_home") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onNavigateToChildHome = {
+                    navController.navigate("child_home") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable("signup") {
+            SignUpScreen(
+                onNavigateToSignIn = {
+                    navController.popBackStack()
+                },
+                onNavigateToVerification = { email ->
+                    navController.navigate("verification/$email")
+                }
+            )
+        }
+
+        composable("forgot_password") {
+            ForgotPasswordScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToResetPassword = { email ->
+                    navController.navigate("reset_password/$email")
+                }
+            )
+        }
+
+        composable(
+            route = "reset_password/{email}",
+            arguments = listOf(navArgument("email") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email") ?: ""
+            ResetPasswordScreen(
+                email = email,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onResetSuccess = {
+                    navController.navigate("signin") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = "verification/{email}",
+            arguments = listOf(navArgument("email") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email") ?: ""
+            VerificationScreen(
+                email = email,
+                onNavigateToParentHome = {
+                    navController.navigate("parent_home") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onNavigateToChildHome = {
+                    navController.navigate("child_home") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable("parent_home") {
+            ParentHomeScreen(
+                onNavigateToProfile = {
+                    navController.navigate("profile")
+                },
+                onNavigateToChild = {
+                    navController.navigate("child_management")
+                },
+                onNavigateToLocation = {
+                    // TODO: Navigate to Location screen
+                },
+                onNavigateToActivity = {
+                    // TODO: Navigate to Activity screen
+                }
+            )
+        }
+
+        composable("child_home") {
+            ChildHomeScreen(
+                onNavigateToProfile = {
+                    navController.navigate("profile")
+                },
+                onOpenDrawer = {
+                    // TODO: Drawer
+                }
+            )
+        }
+
+        composable("profile") {
+            ProfileScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToEdit = {
+                    navController.navigate("edit_profile")
+                },
+                onLogout = {
+                    navController.navigate("welcome") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onNavigateToHome = {
+                    navController.navigate("parent_home") {
+                        popUpTo("profile") { inclusive = true }
+                    }
+                },
+                onNavigateToChild = {
+                    navController.navigate("child_management")
+                },
+                onNavigateToLocation = {
+                    // TODO: Navigate to Location screen
+                },
+                onNavigateToActivity = {
+                    // TODO: Navigate to Activity screen
+                }
+            )
+        }
+
+        composable("edit_profile") {
+            EditProfileScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onProfileUpdated = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable("child_management") {
+            ChildManagementScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToAddChild = {
+                    navController.navigate("add_child")
+                },
+                onNavigateToProfile = {
+                    navController.navigate("profile")
+                },
+                onNavigateToHome = {
+                    navController.navigate("parent_home")
+                },
+                onNavigateToLocation = {
+                    // TODO: Navigate to Location screen
+                },
+                onNavigateToActivity = {
+                    // TODO: Navigate to Activity screen
+                }
+            )
+        }
+
+        composable("add_child") {
+            AddChildScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToQRCode = { qrCode, childName ->
+                    navController.navigate("qr_code/$qrCode/$childName") {
+                        popUpTo("child_management") { inclusive = false }
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = "qr_code/{qrCode}/{childName}",
+            arguments = listOf(
+                navArgument("qrCode") { type = NavType.StringType },
+                navArgument("childName") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val qrCode = backStackEntry.arguments?.getString("qrCode") ?: ""
+            val childName = backStackEntry.arguments?.getString("childName") ?: ""
+            QRCodeScreen(
+                qrCodeData = qrCode,
+                childName = childName,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToChildManagement = {
+                    navController.navigate("child_management") {
+                        popUpTo("child_management") { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }

@@ -1,12 +1,14 @@
 package com.example.dam_android.viewmodel
 
+// Ce fichier n'est plus utilisé car tous les écrans Compose utilisent l'état local avec remember
+// au lieu de ViewModels. Il est conservé pour compatibilité mais peut être supprimé.
+
+// Si vous avez besoin d'un ViewModel à l'avenir, décommentez ce code et créez les ViewModels correspondants.
+
+/*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.dam_android.data.repository.AuthRepository
-import com.example.dam_android.ui.forgotpassword.ForgotPasswordViewModel
-import com.example.dam_android.ui.resetpassword.ResetPasswordViewModel
-import com.example.dam_android.ui.signin.SignInViewModel
-import com.example.dam_android.ui.signup.SignUpViewModel
+import com.example.dam_android.network.repository.AuthRepository
 
 class ViewModelFactory(
     private val authRepository: AuthRepository
@@ -14,20 +16,7 @@ class ViewModelFactory(
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return when {
-            modelClass.isAssignableFrom(SignInViewModel::class.java) -> {
-                SignInViewModel(authRepository) as T
-            }
-            modelClass.isAssignableFrom(SignUpViewModel::class.java) -> {
-                SignUpViewModel(authRepository) as T
-            }
-            modelClass.isAssignableFrom(ForgotPasswordViewModel::class.java) -> {
-                ForgotPasswordViewModel(authRepository) as T
-            }
-            modelClass.isAssignableFrom(ResetPasswordViewModel::class.java) -> {
-                ResetPasswordViewModel(authRepository) as T
-            }
-            else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
-        }
+        throw IllegalArgumentException("ViewModels non implémentés - Utiliser l'état local avec Compose")
     }
 }
+*/

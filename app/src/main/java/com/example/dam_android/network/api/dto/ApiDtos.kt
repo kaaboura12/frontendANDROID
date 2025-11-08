@@ -29,6 +29,11 @@ data class LoginRequest(
     val password: String
 )
 
+// QR Login Request
+data class QrLoginRequest(
+    val qrCode: String
+)
+
 // Login Response - retourne access_token et user
 data class LoginResponse(
     val access_token: String,

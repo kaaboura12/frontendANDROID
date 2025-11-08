@@ -16,6 +16,7 @@ object NavRoutes {
     const val CHILD_HOME = "child_home"
     const val PROFILE = "profile"
     const val GALLERY = "gallery"
+    const val LOGIN_CHILD_QR = "login_child_qr"
 
     fun resetPassword(email: String) = "reset_password/$email"
     fun verification(email: String) = "verification/$email"

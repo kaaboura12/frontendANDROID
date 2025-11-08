@@ -3,6 +3,7 @@ package com.example.dam_android.network.api
 import android.util.Log
 import com.example.dam_android.network.api.dto.ForgotPasswordRequest
 import com.example.dam_android.network.api.dto.LoginRequest
+import com.example.dam_android.network.api.dto.QrLoginRequest
 import com.example.dam_android.network.api.dto.RegisterRequest
 import com.example.dam_android.network.api.dto.ResetPasswordRequest
 import com.example.dam_android.network.api.dto.UpdateUserRequest
@@ -120,6 +121,49 @@ object ApiService {
             Result.failure(Exception(errorMsg))
         } catch (e: Exception) {
             Log.e(TAG, "❌ Exception loginUser: ${e.message}", e)
+            Result.failure(Exception("Erreur de connexion: ${e.message}"))
+        }
+    }
+
+    /**
+     * Connexion d'un enfant avec QR code
+     * Retourne un Pair<User, String> où le String est le token d'authentification
+     */
+    suspend fun loginChildWithQr(qrCode: String): Result<Pair<User, String>> {
+        return try {
+            val request = QrLoginRequest(qrCode)
+            Log.d(TAG, "📤 Envoi requête login QR: qrCode=${qrCode.take(10)}...")
+            val loginResponse = api.loginWithQr(request)
+
+            val userResponse = loginResponse.user
+            val user = User(
+                id = userResponse.id,
+                name = userResponse.firstName,
+                lastName = userResponse.lastName,
+                email = userResponse.email,
+                phoneNumber = userResponse.phoneNumber ?: "",
+                roleString = userResponse.role,
+                password = ""
+            )
+            Log.d(TAG, "✅ Connexion QR réussie: ${user.email}, Token: ${loginResponse.access_token.take(20)}...")
+            Result.success(Pair(user, loginResponse.access_token))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            Log.e(TAG, "❌ Erreur connexion QR - Code ${e.code()}: $errorBody")
+
+            val errorMsg = try {
+                errorBody?.let {
+                    if (it.contains("message")) {
+                        it.substringAfter("\"message\":\"").substringBefore("\"")
+                    } else it
+                } ?: "QR code invalide ou expiré"
+            } catch (ex: Exception) {
+                "QR code invalide ou expiré"
+            }
+
+            Result.failure(Exception(errorMsg))
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Exception loginChildWithQr: ${e.message}", e)
             Result.failure(Exception("Erreur de connexion: ${e.message}"))
         }
     }

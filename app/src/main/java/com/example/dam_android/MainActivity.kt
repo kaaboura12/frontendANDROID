@@ -99,6 +99,22 @@ fun AppNavigation() {
                     navController.navigate("child_home") {
                         popUpTo(0) { inclusive = true }
                     }
+                },
+                onNavigateToChildQrLogin = {
+                    navController.navigate("login_child_qr")
+                }
+            )
+        }
+
+        composable("login_child_qr") {
+            LoginChildQrScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToChildHome = {
+                    navController.navigate("child_home") {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             )
         }

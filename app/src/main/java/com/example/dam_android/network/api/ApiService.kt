@@ -2,6 +2,7 @@ package com.example.dam_android.network.api
 
 import android.util.Log
 import com.example.dam_android.network.api.dto.ForgotPasswordRequest
+import com.example.dam_android.network.api.dto.GoogleLoginRequest
 import com.example.dam_android.network.api.dto.LoginRequest
 import com.example.dam_android.network.api.dto.QrLoginRequest
 import com.example.dam_android.network.api.dto.RegisterRequest
@@ -53,7 +54,7 @@ object ApiService {
                     email = userResponse.email,
                     phoneNumber = userResponse.phoneNumber ?: "",
                     password = "",
-                    roleString = userResponse.role
+                    roleString = userResponse.role ?: "PARENT"
                 )
                 Log.d(TAG, "✅ Inscription réussie: ${user.email}, Message: ${registerResponse.message}")
                 Result.success(user)
@@ -99,7 +100,7 @@ object ApiService {
                 lastName = userResponse.lastName,
                 email = userResponse.email,
                 phoneNumber = userResponse.phoneNumber ?: "",
-                roleString = userResponse.role,
+                roleString = userResponse.role ?: "PARENT",
                 password = ""
             )
             Log.d(TAG, "✅ Connexion réussie: ${user.email}, Token: ${loginResponse.access_token.take(20)}...")
@@ -135,17 +136,18 @@ object ApiService {
             Log.d(TAG, "📤 Envoi requête login QR: qrCode=${qrCode.take(10)}...")
             val loginResponse = api.loginWithQr(request)
 
-            val userResponse = loginResponse.user
+            val childResponse = loginResponse.child
+            // Convert child to User for consistency with the rest of the app
             val user = User(
-                id = userResponse.id,
-                name = userResponse.firstName,
-                lastName = userResponse.lastName,
-                email = userResponse.email,
-                phoneNumber = userResponse.phoneNumber ?: "",
-                roleString = userResponse.role,
+                id = childResponse.id,
+                name = childResponse.firstName,
+                lastName = childResponse.lastName,
+                email = childResponse.email ?: "${childResponse.firstName.lowercase()}.${childResponse.lastName.lowercase()}@child.weldiwin.com",
+                phoneNumber = childResponse.phoneNumber ?: "",
+                roleString = childResponse.role ?: "CHILD", // Default to CHILD if role is null
                 password = ""
             )
-            Log.d(TAG, "✅ Connexion QR réussie: ${user.email}, Token: ${loginResponse.access_token.take(20)}...")
+            Log.d(TAG, "✅ Connexion QR réussie: ${user.name} ${user.lastName}, Token: ${loginResponse.access_token.take(20)}...")
             Result.success(Pair(user, loginResponse.access_token))
         } catch (e: HttpException) {
             val errorBody = e.response()?.errorBody()?.string()
@@ -169,6 +171,49 @@ object ApiService {
     }
 
     /**
+     * Connexion avec Google
+     * Retourne un Pair<User, String> où le String est le token d'authentification
+     */
+    suspend fun loginWithGoogle(idToken: String): Result<Pair<User, String>> {
+        return try {
+            val request = GoogleLoginRequest(idToken)
+            Log.d(TAG, "📤 Envoi requête login Google: idToken=${idToken.take(20)}...")
+            val loginResponse = api.loginWithGoogle(request)
+
+            val userResponse = loginResponse.user
+            val user = User(
+                id = userResponse.id,
+                name = userResponse.firstName,
+                lastName = userResponse.lastName,
+                email = userResponse.email,
+                phoneNumber = userResponse.phoneNumber ?: "",
+                roleString = userResponse.role ?: "PARENT", // Default to PARENT for Google sign-in
+                password = ""
+            )
+            Log.d(TAG, "✅ Connexion Google réussie: ${user.email}, Token: ${loginResponse.access_token.take(20)}...")
+            Result.success(Pair(user, loginResponse.access_token))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            Log.e(TAG, "❌ Erreur connexion Google - Code ${e.code()}: $errorBody")
+
+            val errorMsg = try {
+                errorBody?.let {
+                    if (it.contains("message")) {
+                        it.substringAfter("\"message\":\"").substringBefore("\"")
+                    } else it
+                } ?: "Token Google invalide"
+            } catch (ex: Exception) {
+                "Token Google invalide"
+            }
+
+            Result.failure(Exception(errorMsg))
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Exception loginWithGoogle: ${e.message}", e)
+            Result.failure(Exception("Erreur de connexion: ${e.message}"))
+        }
+    }
+
+    /**
      * Vérification du code à 6 chiffres
      */
     suspend fun verifyCode(email: String, code: String): Result<User> {
@@ -186,7 +231,7 @@ object ApiService {
                     email = userResponse.email,
                     phoneNumber = userResponse.phoneNumber ?: "",
                     password = "",
-                    roleString = userResponse.role
+                    roleString = userResponse.role ?: "PARENT"
                 )
                 Log.d(TAG, "✅ Vérification réussie: ${user.email}")
                 Result.success(user)
@@ -228,7 +273,7 @@ object ApiService {
                     lastName = userResponse.lastName,
                     email = userResponse.email,
                     phoneNumber = userResponse.phoneNumber ?: "",
-                    roleString = userResponse.role,
+                    roleString = userResponse.role ?: "PARENT",
                     password = ""
                 )
             }

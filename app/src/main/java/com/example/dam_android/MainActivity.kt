@@ -270,6 +270,9 @@ fun AppNavigation() {
                 },
                 onNavigateToActivity = {
                     // TODO: Navigate to Activity screen
+                },
+                onNavigateToQRCode = { qrCode, childName ->
+                    navController.navigate("qr_code/$qrCode/$childName")
                 }
             )
         }

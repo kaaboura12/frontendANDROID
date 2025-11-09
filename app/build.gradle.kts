@@ -101,6 +101,9 @@ dependencies {
     // ML Kit pour scan de barcode/QR
     implementation("com.google.mlkit:barcode-scanning:17.2.0")
 
+    // Google Sign-In
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

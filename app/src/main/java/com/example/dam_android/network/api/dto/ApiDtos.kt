@@ -34,10 +34,38 @@ data class QrLoginRequest(
     val qrCode: String
 )
 
+// Google Login Request
+data class GoogleLoginRequest(
+    val idToken: String
+)
+
 // Login Response - retourne access_token et user
 data class LoginResponse(
     val access_token: String,
     val user: UserResponse
+)
+
+// QR Login Response - retourne access_token et child (pas user)
+data class QrLoginResponse(
+    val access_token: String,
+    val child: ChildResponse
+)
+
+// Child Response - structure pour les enfants
+data class ChildResponse(
+    @SerializedName("_id")
+    val id: String,
+    val firstName: String,
+    val lastName: String,
+    val email: String? = null,
+    val phoneNumber: String? = null,
+    val role: String? = null, // Nullable because backend might not always send it
+    val status: String? = null,
+    val avatarUrl: String? = null,
+    val qrCode: String? = null,
+    val parent: String? = null,
+    val createdAt: String? = null,
+    val updatedAt: String? = null
 )
 
 // Verification Request
@@ -96,7 +124,7 @@ data class UserResponse(
     val lastName: String,
     val email: String,
     val phoneNumber: String? = null,
-    val role: String,
+    val role: String? = null, // Nullable for safety, backend should always send it
     val status: String? = null,
     val avatarUrl: String? = null,
     val isVerified: Boolean? = null,

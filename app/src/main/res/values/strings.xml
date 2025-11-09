@@ -25,4 +25,10 @@
     <string name="password_hint">Password</string>
     <string name="confirm_password_hint">Confirm Password</string>
     <string name="forgot_password">Forgot Password?</string>
+    
+    <!-- Google Sign-In Web Client ID -->
+    <!-- TODO: Replace with your actual Web Client ID from Google Cloud Console -->
+    <!-- Get it from: https://console.cloud.google.com/apis/credentials -->
+    <!-- IMPORTANT: This must be a Web application type OAuth 2.0 Client ID, not Android -->
+    <string name="GOOGLE_CLIENT_ID"></string>
 </resources>

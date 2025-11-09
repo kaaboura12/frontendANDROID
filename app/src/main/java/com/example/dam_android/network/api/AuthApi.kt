@@ -5,7 +5,9 @@ import com.example.dam_android.network.api.dto.ForgotPasswordRequest
 import com.example.dam_android.network.api.dto.ForgotPasswordResponse
 import com.example.dam_android.network.api.dto.LoginRequest
 import com.example.dam_android.network.api.dto.LoginResponse
+import com.example.dam_android.network.api.dto.GoogleLoginRequest
 import com.example.dam_android.network.api.dto.QrLoginRequest
+import com.example.dam_android.network.api.dto.QrLoginResponse
 import com.example.dam_android.network.api.dto.RegisterRequest
 import com.example.dam_android.network.api.dto.RegisterResponse
 import com.example.dam_android.network.api.dto.ResetPasswordRequest
@@ -28,8 +30,11 @@ interface AuthApi {
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): LoginResponse
 
-    @POST("auth/qrcode/login")
-    suspend fun loginWithQr(@Body request: QrLoginRequest): LoginResponse
+    @POST("auth/login/qr")
+    suspend fun loginWithQr(@Body request: QrLoginRequest): QrLoginResponse
+
+    @POST("auth/login/google")
+    suspend fun loginWithGoogle(@Body request: GoogleLoginRequest): LoginResponse
 
     @POST("auth/verify")
     suspend fun verify(@Body request: VerificationRequest): VerificationResponse

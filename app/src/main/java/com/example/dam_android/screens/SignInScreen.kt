@@ -31,6 +31,11 @@ import com.example.dam_android.ui.theme.*
 import com.example.dam_android.network.api.ApiService
 import com.example.dam_android.network.local.SessionManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
+import com.example.dam_android.util.GoogleSignInHelper
 import kotlinx.coroutines.launch
 
 @Composable
@@ -49,7 +54,8 @@ fun SignInScreen(
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-
+    
+    // Define functions first (before they are used) - this helps IDE find usages
     suspend fun handleSignIn() {
         if (email.isBlank() || password.isBlank()) {
             errorMessage = "Veuillez remplir tous les champs"
@@ -85,6 +91,93 @@ fun SignInScreen(
         } catch (e: Exception) {
             isLoading = false
             errorMessage = "Erreur de connexion: ${e.message}"
+        }
+    }
+
+    suspend fun handleGoogleSignIn(idToken: String) {
+        isLoading = true
+        errorMessage = null
+
+        try {
+            val result = ApiService.loginWithGoogle(idToken)
+
+            result.onSuccess { (user, token) ->
+                val sessionManager = SessionManager.getInstance(context)
+                sessionManager.saveUser(user, token)
+
+                isLoading = false
+
+                when (user.roleString.lowercase()) {
+                    "parent" -> onNavigateToParentHome()
+                    "child", "enfant" -> onNavigateToChildHome()
+                    else -> onNavigateToParentHome()
+                }
+            }
+
+            result.onFailure { exception ->
+                isLoading = false
+                errorMessage = exception.message ?: "Erreur de connexion Google"
+            }
+        } catch (e: Exception) {
+            isLoading = false
+            errorMessage = "Erreur de connexion Google: ${e.message}"
+        }
+    }
+    
+    // Google Sign-In client
+    // Web Client ID is read from strings.xml (GOOGLE_CLIENT_ID)
+    // If not configured, it will show an error. See GOOGLE_SIGNIN_SETUP.md for setup instructions
+    val googleSignInClient = remember {
+        GoogleSignInHelper.getGoogleSignInClient(context)
+    }
+    
+    // Google Sign-In launcher (uses handleGoogleSignIn function defined above)
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        coroutineScope.launch {
+            try {
+                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                val account = task.getResult(ApiException::class.java)
+                
+                account?.let { acc ->
+                    val idToken = GoogleSignInHelper.getIdToken(acc)
+                    
+                    if (idToken != null) {
+                        // We have idToken, proceed with backend authentication
+                        handleGoogleSignIn(idToken)
+                    } else {
+                        // idToken is null - Web Client ID might not be configured
+                        isLoading = false
+                        errorMessage = "Google Sign-In successful but ID token is missing. Please configure Web Client ID in GoogleSignInHelper.kt"
+                    }
+                } ?: run {
+                    errorMessage = "Failed to get Google account"
+                    isLoading = false
+                }
+            } catch (e: ApiException) {
+                isLoading = false
+                when (e.statusCode) {
+                    12501 -> errorMessage = "Google Sign-In was cancelled"
+                    7 -> errorMessage = "Network error. Please check your internet connection"
+                    10 -> {
+                        // Status code 10 = DEVELOPER_ERROR
+                        // This means the Web Client ID is missing, incorrect, or not properly configured
+                        errorMessage = "Developer error. Please check Web Client ID configuration.\n\n" +
+                                "To fix this:\n" +
+                                "1. Go to Google Cloud Console\n" +
+                                "2. Create a Web application OAuth 2.0 Client ID\n" +
+                                "3. Add it to res/values/strings.xml as 'GOOGLE_CLIENT_ID'\n" +
+                                "4. Rebuild the app"
+                    }
+                    else -> errorMessage = "Google Sign-In failed: ${e.message ?: "Unknown error (Code: ${e.statusCode})"}"
+                }
+                android.util.Log.e("SignInScreen", "Google Sign-In error: Status ${e.statusCode}, Message: ${e.message}", e)
+            } catch (e: Exception) {
+                isLoading = false
+                errorMessage = "Error: ${e.message}"
+                android.util.Log.e("SignInScreen", "Google Sign-In exception", e)
+            }
         }
     }
 
@@ -286,6 +379,79 @@ fun SignInScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Divider with "OR"
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    color = Black.copy(alpha = 0.2f)
+                )
+                Text(
+                    text = "OU",
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    fontSize = 14.sp,
+                    color = Black.copy(alpha = 0.6f),
+                    fontWeight = FontWeight.Medium
+                )
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    color = Black.copy(alpha = 0.2f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Google Sign In Button
+            OutlinedButton(
+                onClick = {
+                    try {
+                        val signInIntent = googleSignInClient.signInIntent
+                        googleSignInLauncher.launch(signInIntent)
+                        isLoading = true
+                        errorMessage = null
+                    } catch (e: Exception) {
+                        errorMessage = "Error starting Google Sign-In: ${e.message}"
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = White,
+                    contentColor = Color(0xFF4285F4) // Google Blue
+                ),
+                shape = RoundedCornerShape(12.dp),
+                border = androidx.compose.foundation.BorderStroke(2.dp, Color(0xFF4285F4)),
+                enabled = !isLoading
+            ) {
+                // Google Icon (using a simple colored box as placeholder)
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .background(Color(0xFF4285F4), RoundedCornerShape(4.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "G",
+                        color = White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = "Continuer avec Google",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF4285F4)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Bouton "Sign in as child" (QR code login)
             OutlinedButton(
                 onClick = onNavigateToChildQrLogin,
@@ -297,7 +463,8 @@ fun SignInScreen(
                     contentColor = OrangeButton
                 ),
                 shape = RoundedCornerShape(12.dp),
-                border = androidx.compose.foundation.BorderStroke(2.dp, OrangeButton)
+                border = androidx.compose.foundation.BorderStroke(2.dp, OrangeButton),
+                enabled = !isLoading
             ) {
                 Icon(
                     imageVector = Icons.Default.QrCodeScanner,

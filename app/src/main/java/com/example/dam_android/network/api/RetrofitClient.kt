@@ -65,7 +65,9 @@ object RetrofitClient {
     }
 
     // Configure Gson to NOT serialize null values (like iOS probably does)
+    // Also register custom deserializer for ChildModel to handle parent field
     private val gson = GsonBuilder()
+        .registerTypeAdapter(com.example.dam_android.models.ChildModel::class.java, com.example.dam_android.models.ChildModelDeserializer())
         .create() // By default, Gson doesn't serialize nulls
 
     private val retrofit = Retrofit.Builder()

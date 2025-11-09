@@ -27,8 +27,7 @@
     <string name="forgot_password">Forgot Password?</string>
     
     <!-- Google Sign-In Web Client ID -->
-    <!-- TODO: Replace with your actual Web Client ID from Google Cloud Console -->
-    <!-- Get it from: https://console.cloud.google.com/apis/credentials -->
-    <!-- IMPORTANT: This must be a Web application type OAuth 2.0 Client ID, not Android -->
-    <string name="GOOGLE_CLIENT_ID"></string>
+    <!-- IMPORTANT: This must match the GOOGLE_CLIENT_ID in your backend .env file -->
+    <string name="GOOGLE_CLIENT_ID">874691787165-j3qrph4i6dcgk744f92t0pfsrqp0iqg0.apps.googleusercontent.com</string>
+    
 </resources>

@@ -191,10 +191,10 @@ fun AppNavigation() {
                     navController.navigate("child_management")
                 },
                 onNavigateToLocation = {
-                    // TODO: Navigate to Location screen
+                    navController.navigate("location")
                 },
-                onNavigateToActivity = {
-                    // TODO: Navigate to Activity screen
+                onNavigateToChat = {
+                    navController.navigate("chat")
                 }
             )
         }
@@ -204,8 +204,16 @@ fun AppNavigation() {
                 onNavigateToProfile = {
                     navController.navigate("profile")
                 },
-                onOpenDrawer = {
-                    // TODO: Drawer
+                onNavigateToChat = {
+                    navController.navigate("chat")
+                },
+                onNavigateToLocation = {
+                    navController.navigate("location")
+                },
+                onLogout = {
+                    navController.navigate("welcome") {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             )
         }
@@ -232,10 +240,10 @@ fun AppNavigation() {
                     navController.navigate("child_management")
                 },
                 onNavigateToLocation = {
-                    // TODO: Navigate to Location screen
+                    navController.navigate("location")
                 },
-                onNavigateToActivity = {
-                    // TODO: Navigate to Activity screen
+                onNavigateToChat = {
+                    navController.navigate("chat")
                 }
             )
         }
@@ -266,10 +274,10 @@ fun AppNavigation() {
                     navController.navigate("parent_home")
                 },
                 onNavigateToLocation = {
-                    // TODO: Navigate to Location screen
+                    navController.navigate("location")
                 },
-                onNavigateToActivity = {
-                    // TODO: Navigate to Activity screen
+                onNavigateToChat = {
+                    navController.navigate("chat")
                 },
                 onNavigateToQRCode = { qrCode, childName ->
                     navController.navigate("qr_code/$qrCode/$childName")
@@ -309,6 +317,22 @@ fun AppNavigation() {
                     navController.navigate("child_management") {
                         popUpTo("child_management") { inclusive = true }
                     }
+                }
+            )
+        }
+
+        composable("location") {
+            LocationScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable("chat") {
+            ChatScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }

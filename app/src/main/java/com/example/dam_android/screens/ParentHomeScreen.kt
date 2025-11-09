@@ -33,7 +33,7 @@ fun ParentHomeScreen(
     onNavigateToProfile: () -> Unit,
     onNavigateToChild: () -> Unit,
     onNavigateToLocation: () -> Unit,
-    onNavigateToActivity: () -> Unit
+    onNavigateToChat: () -> Unit
 ) {
     val context = LocalContext.current
     val storage = LocalStorage.getInstance(context)
@@ -130,7 +130,7 @@ fun ParentHomeScreen(
                         0 -> { /* Already on Home */ }
                         1 -> onNavigateToChild()
                         2 -> onNavigateToLocation()
-                        3 -> onNavigateToActivity()
+                        3 -> onNavigateToChat()
                         4 -> onNavigateToProfile()
                     }
                 }
@@ -472,12 +472,12 @@ private fun BottomNavigationBar(
         NavigationBarItem(
             icon = {
                 Icon(
-                    Icons.Default.Timeline,
-                    contentDescription = "Activity",
+                    Icons.Default.Chat,
+                    contentDescription = "Chat",
                     modifier = Modifier.size(24.dp)
                 )
             },
-            label = { Text("Activity", fontSize = 12.sp) },
+            label = { Text("Chat", fontSize = 12.sp) },
             selected = selectedTab == 3,
             onClick = { onTabSelected(3) },
             colors = NavigationBarItemDefaults.colors(

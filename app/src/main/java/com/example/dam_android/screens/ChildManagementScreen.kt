@@ -34,7 +34,7 @@ fun ChildManagementScreen(
     onNavigateToProfile: () -> Unit,
     onNavigateToHome: () -> Unit,
     onNavigateToLocation: () -> Unit,
-    onNavigateToActivity: () -> Unit,
+    onNavigateToChat: () -> Unit,
     onNavigateToQRCode: (String, String) -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(1) } // Child tab is selected
@@ -170,7 +170,7 @@ fun ChildManagementScreen(
                         0 -> onNavigateToHome()
                         1 -> { /* Already on Child */ }
                         2 -> onNavigateToLocation()
-                        3 -> onNavigateToActivity()
+                        3 -> onNavigateToChat()
                         4 -> onNavigateToProfile()
                     }
                 }
@@ -527,12 +527,12 @@ private fun ChildManagementBottomNavigationBar(
         NavigationBarItem(
             icon = {
                 Icon(
-                    Icons.Default.Timeline,
-                    contentDescription = "Activity",
+                    Icons.Default.Chat,
+                    contentDescription = "Chat",
                     modifier = Modifier.size(24.dp)
                 )
             },
-            label = { Text("Activity", fontSize = 12.sp) },
+            label = { Text("Chat", fontSize = 12.sp) },
             selected = selectedTab == 3,
             onClick = { onTabSelected(3) },
             colors = NavigationBarItemDefaults.colors(

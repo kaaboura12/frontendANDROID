@@ -92,7 +92,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:src="@drawable/ic_home"
-                android:tint="@color/orange_700"
+                app:tint="@color/orange_700"
                 android:contentDescription="Home" />
 
             <TextView
@@ -122,7 +122,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:src="@drawable/ic_child"
-                android:tint="#000000"
+                app:tint="#000000"
                 android:contentDescription="Child" />
 
             <TextView
@@ -152,7 +152,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:src="@drawable/ic_location"
-                android:tint="#000000"
+                app:tint="#000000"
                 android:contentDescription="Location" />
 
             <TextView
@@ -182,7 +182,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:src="@drawable/ic_activity"
-                android:tint="#000000"
+                app:tint="#000000"
                 android:contentDescription="Activity" />
 
             <TextView
@@ -212,7 +212,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:src="@drawable/ic_profile"
-                android:tint="#000000"
+                app:tint="#000000"
                 android:contentDescription="Profile" />
 
             <TextView

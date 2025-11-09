@@ -125,10 +125,11 @@ fun SignInScreen(
     }
     
     // Google Sign-In client
-    // Web Client ID is read from strings.xml (GOOGLE_CLIENT_ID)
-    // If not configured, it will show an error. See GOOGLE_SIGNIN_SETUP.md for setup instructions
+    // Web Client ID is now hardcoded in GoogleSignInHelper - will always work
     val googleSignInClient = remember {
-        GoogleSignInHelper.getGoogleSignInClient(context)
+        val appContext = context.applicationContext
+        android.util.Log.d("SignInScreen", "🔧 Creating GoogleSignInClient...")
+        GoogleSignInHelper.getGoogleSignInClient(appContext)
     }
     
     // Google Sign-In launcher (uses handleGoogleSignIn function defined above)

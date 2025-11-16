@@ -8,15 +8,19 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.example.dam_android.network.local.SessionManager
 import com.example.dam_android.network.api.RetrofitClient
+import com.example.dam_android.network.local.SessionManager
+import com.example.dam_android.models.UserRole
 import com.example.dam_android.screens.*
 import com.example.dam_android.ui.theme.DamAndroidTheme
+import android.net.Uri
+import com.example.dam_android.screens.ChatRoomScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -205,7 +209,7 @@ fun AppNavigation() {
                     navController.navigate("profile")
                 },
                 onNavigateToChat = {
-                    navController.navigate("chat")
+                    navController.navigate("child_chat")
                 },
                 onNavigateToLocation = {
                     navController.navigate("location")
@@ -219,6 +223,8 @@ fun AppNavigation() {
         }
 
         composable("profile") {
+            val context = LocalContext.current
+            val sessionManagerProfile = remember { SessionManager.getInstance(context) }
             ProfileScreen(
                 onNavigateBack = {
                     navController.popBackStack()
@@ -243,7 +249,12 @@ fun AppNavigation() {
                     navController.navigate("location")
                 },
                 onNavigateToChat = {
-                    navController.navigate("chat")
+                    val role = sessionManagerProfile.getUser()?.role
+                    if (role == UserRole.CHILD) {
+                        navController.navigate("child_chat")
+                    } else {
+                        navController.navigate("chat")
+                    }
                 }
             )
         }
@@ -294,6 +305,22 @@ fun AppNavigation() {
                     navController.navigate("qr_code/$qrCode/$childName") {
                         popUpTo("child_management") { inclusive = false }
                     }
+                },
+                onNavigateToLinkChild = {
+                    navController.navigate("link_child")
+                }
+            )
+        }
+
+        composable("link_child") {
+            LinkChildQrScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onLinkSuccess = {
+                    navController.navigate("child_management") {
+                        popUpTo("child_management") { inclusive = true }
+                    }
                 }
             )
         }
@@ -331,6 +358,46 @@ fun AppNavigation() {
 
         composable("chat") {
             ChatScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onOpenRoom = { room ->
+                    val encodedChildName = Uri.encode(room.childName)
+                    navController.navigate("chat_room/${room.roomId}?childName=$encodedChildName")
+                }
+            )
+        }
+
+        composable("child_chat") {
+            ChildChatScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onOpenRoom = { roomId, childName ->
+                    val encodedName = childName?.let { Uri.encode(it) } ?: ""
+                    navController.navigate("chat_room/$roomId?childName=$encodedName") {
+                        popUpTo("child_chat") { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = "chat_room/{roomId}?childName={childName}",
+            arguments = listOf(
+                navArgument("roomId") { type = NavType.StringType },
+                navArgument("childName") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                    nullable = true
+                }
+            )
+        ) { backStackEntry ->
+            val roomId = backStackEntry.arguments?.getString("roomId") ?: return@composable
+            val childName = backStackEntry.arguments?.getString("childName")
+            ChatRoomScreen(
+                roomId = roomId,
+                childNameHint = childName?.takeIf { it.isNotBlank() },
                 onNavigateBack = {
                     navController.popBackStack()
                 }

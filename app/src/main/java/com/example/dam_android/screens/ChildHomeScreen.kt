@@ -1,5 +1,6 @@
 package com.example.dam_android.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,8 +12,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.dam_android.ui.theme.*
@@ -100,6 +104,18 @@ fun ChildHomeScreen(
                     WelcomeCard(userName = currentUser?.name ?: "Enfant")
                 }
 
+                // SOS Button - Prominent Emergency Button
+                item {
+                    SOSButton(onClick = {
+                        // Static for now - just show a toast
+                        Toast.makeText(
+                            context,
+                            "🚨 SOS Activated! (Static for now)",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    })
+                }
+
                 // Mes Jeux
                 item {
                     ChildFeatureCard(
@@ -130,6 +146,73 @@ fun ChildHomeScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SOSButton(onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(12.dp, RoundedCornerShape(20.dp)),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFE53935)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        onClick = onClick
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // Large SOS icon
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .background(White.copy(alpha = 0.3f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.Warning,
+                    contentDescription = "SOS",
+                    tint = White,
+                    modifier = Modifier.size(48.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // SOS Text
+            Text(
+                text = "SOS",
+                fontSize = 32.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = White,
+                letterSpacing = 4.sp
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Emergency message
+            Text(
+                text = "Emergency Button",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = White.copy(alpha = 0.9f),
+                textAlign = TextAlign.Center
+            )
+            
+            Spacer(modifier = Modifier.height(4.dp))
+            
+            Text(
+                text = "Press in case of emergency",
+                fontSize = 12.sp,
+                color = White.copy(alpha = 0.7f),
+                textAlign = TextAlign.Center
+            )
         }
     }
 }

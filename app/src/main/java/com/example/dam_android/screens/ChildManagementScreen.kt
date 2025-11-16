@@ -16,15 +16,22 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.dam_android.models.ChildModel
+import com.example.dam_android.network.api.ApiService
 import com.example.dam_android.network.api.RetrofitClient
 import com.example.dam_android.ui.theme.*
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.launch
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +52,9 @@ fun ChildManagementScreen(
     var children by remember { mutableStateOf<List<ChildModel>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var childToDelete by remember { mutableStateOf<ChildModel?>(null) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var isDeleting by remember { mutableStateOf(false) }
     
     // Fetch children on screen load
     LaunchedEffect(Unit) {
@@ -121,6 +131,135 @@ fun ChildManagementScreen(
                 isLoading = false
             }
         }
+    }
+
+    // Delete function
+    fun deleteChild(child: ChildModel) {
+        coroutineScope.launch {
+            isDeleting = true
+            try {
+                Log.d("ChildManagementScreen", "🗑️ Deleting child: ${child.firstName} ${child.lastName} (${child._id})")
+                val result = ApiService.deleteChild(child._id)
+                
+                result.onSuccess {
+                    Log.d("ChildManagementScreen", "✅ Child deleted successfully")
+                    Toast.makeText(
+                        context,
+                        "Child deleted successfully",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    refreshChildren()
+                }.onFailure { error ->
+                    Log.e("ChildManagementScreen", "❌ Failed to delete child: ${error.message}")
+                    Toast.makeText(
+                        context,
+                        "Failed to delete: ${error.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } catch (e: Exception) {
+                Log.e("ChildManagementScreen", "❌ Exception deleting child", e)
+                Toast.makeText(
+                    context,
+                    "Error: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            } finally {
+                isDeleting = false
+                showDeleteDialog = false
+                childToDelete = null
+            }
+        }
+    }
+
+    // Delete confirmation dialog
+    if (showDeleteDialog && childToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { 
+                if (!isDeleting) {
+                    showDeleteDialog = false
+                    childToDelete = null
+                }
+            },
+            icon = {
+                Icon(
+                    Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = Color(0xFFE53935),
+                    modifier = Modifier.size(48.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = "Delete Child?",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            },
+            text = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Are you sure you want to delete:",
+                        fontSize = 16.sp,
+                        color = Black.copy(alpha = 0.7f),
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "${childToDelete?.firstName} ${childToDelete?.lastName}",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFE53935),
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "This action cannot be undone. All data associated with this child will be permanently deleted.",
+                        fontSize = 14.sp,
+                        color = Black.copy(alpha = 0.6f),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        childToDelete?.let { deleteChild(it) }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFE53935)
+                    ),
+                    shape = RoundedCornerShape(24.dp),
+                    enabled = !isDeleting
+                ) {
+                    if (isDeleting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("Delete", fontWeight = FontWeight.Bold)
+                    }
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        childToDelete = null
+                    },
+                    shape = RoundedCornerShape(24.dp),
+                    enabled = !isDeleting
+                ) {
+                    Text("Cancel")
+                }
+            },
+            shape = RoundedCornerShape(24.dp)
+        )
     }
 
     Scaffold(
@@ -306,8 +445,8 @@ fun ChildManagementScreen(
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(children) { child ->
-                            ChildCard(
+                        items(children, key = { it._id }) { child ->
+                            SwipeToDeleteChildCard(
                                 child = child,
                                 onViewQRCode = {
                                     if (child.qrCode != null && child.qrCode.isNotBlank()) {
@@ -320,6 +459,10 @@ fun ChildManagementScreen(
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
+                                },
+                                onDelete = {
+                                    childToDelete = child
+                                    showDeleteDialog = true
                                 }
                             )
                         }
@@ -329,6 +472,72 @@ fun ChildManagementScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SwipeToDeleteChildCard(
+    child: ChildModel,
+    onViewQRCode: () -> Unit,
+    onDelete: () -> Unit
+) {
+    var isVisible by remember { mutableStateOf(true) }
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { dismissValue ->
+            when (dismissValue) {
+                SwipeToDismissBoxValue.EndToStart -> {
+                    // Swiped left to delete
+                    onDelete()
+                    false // Don't dismiss yet, wait for confirmation
+                }
+                else -> false
+            }
+        }
+    )
+
+    AnimatedVisibility(
+        visible = isVisible,
+        exit = shrinkVertically(
+            animationSpec = tween(300),
+            shrinkTowards = Alignment.Top
+        ) + fadeOut()
+    ) {
+        SwipeToDismissBox(
+            state = dismissState,
+            backgroundContent = {
+                // Delete background (shown when swiping)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0xFFE53935), RoundedCornerShape(16.dp))
+                        .padding(horizontal = 20.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            tint = White,
+                            modifier = Modifier.size(32.dp)
+                        )
+                        Text(
+                            text = "Delete",
+                            color = White,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            },
+            enableDismissFromStartToEnd = false,
+            enableDismissFromEndToStart = true
+        ) {
+            ChildCard(child = child, onViewQRCode = onViewQRCode)
         }
     }
 }

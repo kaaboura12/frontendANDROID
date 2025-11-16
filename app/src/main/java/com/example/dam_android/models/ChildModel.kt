@@ -236,3 +236,12 @@ data class AddChildResponse(
     val qrCode: String
 )
 
+data class LinkParentRequest(
+    val qrCode: String
+)
+
+data class LinkParentResponse(
+    val message: String,
+    val child: ChildModel
+)
+

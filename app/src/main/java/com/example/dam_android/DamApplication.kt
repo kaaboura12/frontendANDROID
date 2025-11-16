@@ -1,7 +1,9 @@
 package com.example.dam_android
 
 import android.app.Application
+import android.preference.PreferenceManager
 import android.util.Log
+import org.osmdroid.config.Configuration
 import java.net.InetAddress
 
 /**
@@ -12,8 +14,29 @@ class DamApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        // Initialize osmdroid configuration ONCE globally
+        initOsmdroid()
+
         // Force le pré-chargement du DNS pour Vercel
         preloadDns()
+    }
+
+    /**
+     * Initialize osmdroid to prevent grey tiles and enable tile downloads
+     */
+    private fun initOsmdroid() {
+        try {
+            val ctx = applicationContext
+            Configuration.getInstance().load(
+                ctx,
+                PreferenceManager.getDefaultSharedPreferences(ctx)
+            )
+            // Set user agent to app package name
+            Configuration.getInstance().userAgentValue = packageName
+            Log.d("DamApplication", "✅ osmdroid initialized successfully")
+        } catch (e: Exception) {
+            Log.e("DamApplication", "❌ Failed to initialize osmdroid: ${e.message}", e)
+        }
     }
 
     /**

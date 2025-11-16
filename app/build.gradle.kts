@@ -66,6 +66,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.ui)
 
     // Compose Debug Tools
     debugImplementation(libs.androidx.compose.ui.tooling)
@@ -100,6 +102,15 @@ dependencies {
 
     // ML Kit pour scan de barcode/QR
     implementation("com.google.mlkit:barcode-scanning:17.2.0")
+
+    // Socket.IO for real-time messaging
+    implementation("io.socket:socket.io-client:2.1.0") {
+        exclude(group = "org.json", module = "json")
+    }
+    implementation("org.json:json:20231013")
+
+    // WebRTC for peer-to-peer audio calls
+    implementation("io.getstream:stream-webrtc-android:1.1.3")
 
     // Google Sign-In
     implementation("com.google.android.gms:play-services-auth:21.0.0")

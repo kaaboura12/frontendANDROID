@@ -17,7 +17,9 @@ import java.util.concurrent.TimeUnit
 object RetrofitClient {
 
     // Backend hébergé sur Vercel
-    private const val BASE_URL = "https://weldiwinbackend.vercel.app/"
+    //private const val BASE_URL = "https://weldiwinbackend.vercel.app/"
+    private const val BASE_URL = "http://10.0.2.2:3005/"
+
     private const val TAG = "RetrofitClient"
 
     private var sessionManager: SessionManager? = null
@@ -65,9 +67,10 @@ object RetrofitClient {
     }
 
     // Configure Gson to NOT serialize null values (like iOS probably does)
-    // Also register custom deserializer for ChildModel to handle parent field
+    // Also register custom deserializers to handle inconsistent backend responses
     private val gson = GsonBuilder()
         .registerTypeAdapter(com.example.dam_android.models.ChildModel::class.java, com.example.dam_android.models.ChildModelDeserializer())
+        .registerTypeAdapter(com.example.dam_android.network.api.dto.DangerZoneResponse::class.java, com.example.dam_android.network.api.dto.DangerZoneDeserializer())
         .create() // By default, Gson doesn't serialize nulls
 
     private val retrofit = Retrofit.Builder()
@@ -78,5 +81,7 @@ object RetrofitClient {
 
     val authApi: AuthApi = retrofit.create(AuthApi::class.java)
     val childApi: ChildApi = retrofit.create(ChildApi::class.java)
+    val messagesApi: MessagesApi = retrofit.create(MessagesApi::class.java)
+    val dangerZoneApi: DangerZoneApi = retrofit.create(DangerZoneApi::class.java)
 
 }

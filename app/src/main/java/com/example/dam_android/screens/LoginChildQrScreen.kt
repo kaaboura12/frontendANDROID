@@ -5,9 +5,15 @@ import android.content.pm.PackageManager
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.core.*
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ExperimentalGetImage
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
+import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -17,23 +23,40 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.example.dam_android.R
 import com.example.dam_android.network.api.ApiService
 import com.example.dam_android.network.local.SessionManager
-import com.example.dam_android.ui.theme.*
+import com.example.dam_android.ui.theme.Black
+import com.example.dam_android.ui.theme.White
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
@@ -115,306 +138,376 @@ fun LoginChildQrScreen(
         }
     }
 
+    val accentBrush = remember {
+        Brush.horizontalGradient(
+            colors = listOf(Color(0xFFFF9553), Color(0xFFFF6A4F))
+        )
+    }
+    val outlineBrush = remember {
+        Brush.horizontalGradient(
+            colors = listOf(Color(0xFFFFAE6D), Color(0xFFFF7C55))
+        )
+    }
+    val mutedText = Color(0xFF8C6F5B)
+    val hintText = Color(0xFFB19B8D)
+    val cardShape = RoundedCornerShape(28.dp)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(GradientStart, GradientEnd)
-                )
-            )
+            .background(Color(0xFFFFF6ED))
     ) {
-        // Decorative circle
-        Box(
-            modifier = Modifier
-                .size(280.dp)
-                .offset(x = 60.dp, y = (-100).dp)
-                .align(Alignment.TopEnd)
-                .background(BgPeach, CircleShape)
-                .alpha(0.5f)
+        Image(
+            painter = painterResource(id = R.drawable.background),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
         )
 
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 32.dp)
         ) {
-            // Top bar with back button
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onNavigateBack) {
+                OutlinedButton(
+                    onClick = onNavigateBack,
+                    modifier = Modifier.size(48.dp),
+                    shape = CircleShape,
+                    border = BorderStroke(1.dp, Color(0xFFFFC9A2)),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = Color.White.copy(alpha = 0.7f),
+                        contentColor = Color(0xFFEA784D)
+                    ),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
                     Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Retour",
-                        tint = Black
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier.size(22.dp)
                     )
                 }
             }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = cardShape,
+                color = Color.White.copy(alpha = 0.94f),
+                tonalElevation = 6.dp,
+                shadowElevation = 12.dp
             ) {
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Icon
-                Box(
+                Column(
                     modifier = Modifier
-                        .size(80.dp)
-                        .background(OrangeButton, CircleShape),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 28.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
-                        Icons.Default.QrCodeScanner,
-                        contentDescription = "QR Scanner",
-                        tint = White,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Text(
-                    text = "Scan QR Code",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Black
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "Positionnez le QR code dans le cadre",
-                    fontSize = 14.sp,
-                    color = Black.copy(alpha = 0.7f),
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Error message
-                errorMessage?.let {
-                    Card(
+                    Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer
-                        ),
-                        shape = RoundedCornerShape(12.dp)
+                            .size(84.dp)
+                            .clip(CircleShape)
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(Color(0xFFFFB277), Color(0xFFFF7A52))
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = it,
-                            modifier = Modifier.padding(16.dp),
-                            color = MaterialTheme.colorScheme.onErrorContainer,
-                            fontSize = 14.sp
+                        Icon(
+                            imageVector = Icons.Default.QrCodeScanner,
+                            contentDescription = "QR Scanner",
+                            tint = White,
+                            modifier = Modifier.size(40.dp)
                         )
                     }
-                }
 
-                // Camera preview with QR scanner
-                if (hasCameraPermission) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f),
-                        shape = RoundedCornerShape(24.dp),
-                        elevation = CardDefaults.cardElevation(8.dp)
-                    ) {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            CameraPreview(
-                                onQrCodeScanned = { qrCode ->
-                                    coroutineScope.launch {
-                                        handleQrCodeScanned(qrCode)
-                                    }
-                                },
-                                isScanning = isScanning
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Text(
+                        text = "Scan Child QR Code",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Black
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "Align the family QR badge inside the frame to sign in instantly.",
+                        fontSize = 15.sp,
+                        textAlign = TextAlign.Center,
+                        color = mutedText,
+                        lineHeight = 22.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    errorMessage?.let {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color(0xFFFFE3DD)
+                            ),
+                            shape = RoundedCornerShape(18.dp)
+                        ) {
+                            Text(
+                                text = it,
+                                modifier = Modifier.padding(16.dp),
+                                color = Color(0xFFB33A32),
+                                fontSize = 14.sp
                             )
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
 
-                            // Scanning overlay
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(40.dp)
-                            ) {
-                                // QR frame corners
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(
-                                            color = OrangeButton.copy(alpha = 0.3f),
-                                            shape = RoundedCornerShape(24.dp)
-                                        )
+                    if (hasCameraPermission) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(1f),
+                            shape = RoundedCornerShape(26.dp),
+                            elevation = CardDefaults.cardElevation(10.dp)
+                        ) {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                CameraPreview(
+                                    onQrCodeScanned = { qrCode ->
+                                        coroutineScope.launch {
+                                            handleQrCodeScanned(qrCode)
+                                        }
+                                    },
+                                    isScanning = isScanning
                                 )
-                            }
 
-                            // Loading indicator
-                            if (isLoading) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .background(Black.copy(alpha = 0.5f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator(
-                                        color = White,
-                                        modifier = Modifier.size(48.dp)
-                                    )
+                                        .padding(32.dp)
+                                        .clip(RoundedCornerShape(24.dp))
+                                        .background(Color(0xFFFF7C55).copy(alpha = 0.14f))
+                                )
+
+                                if (isLoading) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(Color.Black.copy(alpha = 0.45f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator(
+                                            color = White,
+                                            modifier = Modifier.size(48.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
-                } else {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f),
-                        shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = White
-                        )
-                    ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
+                    } else {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(1f),
+                            shape = RoundedCornerShape(26.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
                         ) {
                             Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(24.dp),
+                                verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Icon(
-                                    Icons.Default.QrCodeScanner,
+                                    imageVector = Icons.Default.QrCodeScanner,
                                     contentDescription = null,
                                     modifier = Modifier.size(64.dp),
-                                    tint = Black.copy(alpha = 0.5f)
+                                    tint = Color(0xFFCEBBAF)
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
-                                    text = "Permission caméra requise",
+                                    text = "Camera permission required",
                                     fontSize = 16.sp,
+                                    fontWeight = FontWeight.SemiBold,
                                     color = Black,
                                     textAlign = TextAlign.Center
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(
+                                    text = "Allow camera access to scan QR codes automatically.",
+                                    fontSize = 14.sp,
+                                    color = mutedText,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(20.dp))
                                 Button(
                                     onClick = {
                                         cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                                     },
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = OrangeButton
-                                    )
+                                        containerColor = Color(0xFFFF8C61),
+                                        contentColor = White
+                                    ),
+                                    shape = RoundedCornerShape(18.dp)
                                 ) {
-                                    Text("Autoriser la caméra")
+                                    Text(text = "Enable camera")
                                 }
                             }
                         }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(18.dp))
 
-                Text(
-                    text = "Placez le QR code à l'intérieur du cadre pour vous connecter",
-                    fontSize = 14.sp,
-                    color = Black.copy(alpha = 0.6f),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Divider with text
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    HorizontalDivider(modifier = Modifier.weight(1f), color = Black.copy(alpha = 0.2f))
                     Text(
-                        text = "  OU  ",
+                        text = "Hold steady for best results. We'll sign you in as soon as we recognise the code.",
                         fontSize = 14.sp,
-                        color = Black.copy(alpha = 0.5f),
-                        fontWeight = FontWeight.Medium
+                        color = mutedText,
+                        textAlign = TextAlign.Center
                     )
-                    HorizontalDivider(modifier = Modifier.weight(1f), color = Black.copy(alpha = 0.2f))
                 }
+            }
 
-                Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
-                // Manual QR code input
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    color = Color.Black.copy(alpha = 0.15f)
+                )
                 Text(
-                    text = "Entrez le code QR manuellement",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Black
+                    text = "or enter code",
+                    fontSize = 13.sp,
+                    color = mutedText,
+                    modifier = Modifier.padding(horizontal = 12.dp)
                 )
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    color = Color.Black.copy(alpha = 0.15f)
+                )
+            }
 
-                Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-                // TextField for manual input
-                OutlinedTextField(
-                    value = manualQrCode,
-                    onValueChange = {
-                        manualQrCode = it
-                        errorMessage = null
-                    },
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = cardShape,
+                color = Color.White.copy(alpha = 0.94f),
+                tonalElevation = 4.dp,
+                shadowElevation = 8.dp
+            ) {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
-                    placeholder = { Text("Entrez le code ici") },
-                    singleLine = true,
-                    enabled = !isLoading,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = White,
-                        unfocusedContainerColor = White,
-                        disabledContainerColor = White.copy(alpha = 0.5f),
-                        focusedBorderColor = OrangeButton,
-                        unfocusedBorderColor = Black.copy(alpha = 0.3f)
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Button to submit manual QR code
-                Button(
-                    onClick = {
-                        coroutineScope.launch {
-                            handleQrCodeScanned(manualQrCode)
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = OrangeButton,
-                        contentColor = White
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    elevation = ButtonDefaults.buttonElevation(
-                        defaultElevation = 4.dp
-                    ),
-                    enabled = !isLoading && manualQrCode.isNotBlank()
+                        .padding(horizontal = 24.dp, vertical = 28.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = White
-                        )
-                    } else {
+                    Text(
+                        text = "Manual sign in",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Black
+                    )
+                    OutlinedTextField(
+                        value = manualQrCode,
+                        onValueChange = {
+                            manualQrCode = it
+                            errorMessage = null
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(58.dp),
+                        placeholder = {
+                            Text(
+                                text = "Enter the code printed on the badge",
+                                color = hintText
+                            )
+                        },
+                        singleLine = true,
+                        enabled = !isLoading,
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            disabledContainerColor = Color.White.copy(alpha = 0.6f),
+                            focusedIndicatorColor = Color(0xFFFF9553),
+                            unfocusedIndicatorColor = Color(0xFFFFD6B2),
+                            focusedTextColor = Black,
+                            unfocusedTextColor = Black,
+                            cursorColor = Color(0xFFFF7C55)
+                        ),
+                        shape = RoundedCornerShape(20.dp)
+                    )
+
+                    Button(
+                        onClick = {
+                            coroutineScope.launch {
+                                handleQrCodeScanned(manualQrCode)
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(58.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = White
+                        ),
+                        shape = RoundedCornerShape(28.dp),
+                        contentPadding = PaddingValues(0.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
+                        enabled = !isLoading && manualQrCode.isNotBlank()
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(28.dp))
+                                .background(accentBrush),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(22.dp),
+                                    color = White,
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Text(
+                                    text = "Sign in",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+
+                    OutlinedButton(
+                        onClick = { manualQrCode = "" },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(54.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color(0xFFFF7C55)
+                        ),
+                        shape = RoundedCornerShape(26.dp),
+                        border = BorderStroke(2.dp, outlineBrush),
+                        enabled = manualQrCode.isNotBlank()
+                    ) {
                         Text(
-                            text = "Se connecter",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
+                            text = "Clear code",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
-
-                Spacer(modifier = Modifier.height(32.dp))
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

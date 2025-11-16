@@ -29,5 +29,7 @@
     <!-- Google Sign-In Web Client ID -->
     <!-- IMPORTANT: This must match the GOOGLE_CLIENT_ID in your backend .env file -->
     <string name="GOOGLE_CLIENT_ID">874691787165-j3qrph4i6dcgk744f92t0pfsrqp0iqg0.apps.googleusercontent.com</string>
+
+    <string name="attribution_audio_recording">Audio recording</string>
     
 </resources>

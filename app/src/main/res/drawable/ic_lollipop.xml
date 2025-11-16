@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="64dp"
+    android:viewportWidth="48"
+    android:viewportHeight="64">
+    
+    <!-- Stick -->
+    <path
+        android:fillColor="#8B4513"
+        android:pathData="M22,32 L26,32 L26,60 L22,60 Z"/>
+    
+    <!-- Circle background -->
+    <path
+        android:fillColor="#FF6B9D"
+        android:pathData="M24,24 m-20,0 a20,20 0 1,1 40,0 a20,20 0 1,1 -40,0"/>
+    
+    <!-- Inner circle for depth -->
+    <path
+        android:fillColor="#FF4081"
+        android:pathData="M24,24 m-16,0 a16,16 0 1,1 32,0 a16,16 0 1,1 -32,0"/>
+    
+    <!-- Spiral pattern -->
+    <path
+        android:fillColor="#FFB3C6"
+        android:pathData="M24,8 Q34,14 34,24 Q34,34 24,40 Q14,34 14,24 Q14,14 24,8 Z"/>
+</vector>
+

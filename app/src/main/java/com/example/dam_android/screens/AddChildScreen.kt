@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,7 +31,8 @@ import org.json.JSONObject
 @Composable
 fun AddChildScreen(
     onNavigateBack: () -> Unit,
-    onNavigateToQRCode: (String, String) -> Unit
+    onNavigateToQRCode: (String, String) -> Unit,
+    onNavigateToLinkChild: () -> Unit
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -373,6 +375,77 @@ fun AddChildScreen(
                         )
                     }
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Divider
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(1.dp)
+                            .background(Black.copy(alpha = 0.2f))
+                    )
+                    Text(
+                        text = "OR",
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Black.copy(alpha = 0.5f)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(1.dp)
+                            .background(Black.copy(alpha = 0.2f))
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Link to Existing Child Button
+                OutlinedButton(
+                    onClick = onNavigateToLinkChild,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = White,
+                        contentColor = OrangeButton
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(2.dp, OrangeButton),
+                    shape = RoundedCornerShape(28.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            androidx.compose.material.icons.Icons.Default.Link,
+                            contentDescription = "Link",
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            text = "Link to Existing Child",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Info text
+                Text(
+                    text = "Already have a child registered? Link yourself as a parent by scanning their QR code.",
+                    fontSize = 12.sp,
+                    color = Black.copy(alpha = 0.5f),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    lineHeight = 16.sp
+                )
 
                 Spacer(modifier = Modifier.height(24.dp))
             }
